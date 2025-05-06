@@ -46,6 +46,20 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "uri.getQueryParameter(\"text\") ${uri.getQueryParameter("text")}")
         Log.d(TAG, "uri.fragment ${uri.fragment}")
 
+        val hosts = listOf("https://myserver1.com","https://myserver2.com")
+
+        val movieId = 123
+
+        // https://myserver1.com123?queryParam=4
+        hosts.forEach {
+            val uri2 = Uri.Builder()
+                .scheme("https")
+                .authority(it)
+                .path("/api/v1/movies/${movieId}")
+                .appendQueryParameter("queryParam", "4")
+                .build()
+        }
+
 
         val itemsRv: RecyclerView = findViewById(R.id.items)
         itemsRv.adapter = adapter
@@ -56,6 +70,7 @@ class MainActivity : AppCompatActivity() {
                 GsonConverterFactory.create(
                     GsonBuilder()
                         .registerTypeAdapter(Date::class.java, CustomDateTypeAdapter())
+                        .registerTypeAdapter(NewsItem::class.java, NewsItemTypeAdapter())
                         .create()
                 )
             )
@@ -64,7 +79,8 @@ class MainActivity : AppCompatActivity() {
 
         serverApi.getNews1().enqueue(object : Callback<NewsResponse> {
             override fun onResponse(call: Call<NewsResponse>, response: Response<NewsResponse>) {
-                Log.i(TAG, "onResponse: ${response.body()}")
+                Log.i(TAG, "onResponse: ${response.code()} ${response.body()}")
+
                 adapter.items = response.body()?.data?.items ?: emptyList()
             }
 
@@ -87,3 +103,5 @@ interface Sprint11ServerApi {
     @GET("main/jsons/news_1.json")
     fun getNews1(): Call<NewsResponse>
 }
+
+
